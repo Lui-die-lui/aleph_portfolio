@@ -48,6 +48,20 @@
     var lastTrigger = null;
     var tabs = dialog.querySelectorAll('.modal-tab');
 
+    function resetModalScroll() {
+      panel.scrollTop = 0;
+      content.scrollTop = 0;
+      dialog.scrollTop = 0;
+
+      // Opening a previously scrolled <dialog> can restore its old position
+      // after layout. Reset once more on the next painted frame.
+      window.requestAnimationFrame(function () {
+        panel.scrollTop = 0;
+        content.scrollTop = 0;
+        dialog.scrollTop = 0;
+      });
+    }
+
     function setActiveTab(key) {
       tabs.forEach(function (tab) {
         var isActive = tab.getAttribute('data-template') === key;
@@ -62,7 +76,7 @@
 
       content.innerHTML = '';
       content.appendChild(tpl.content.cloneNode(true));
-      panel.scrollTop = 0;
+      resetModalScroll();
       setActiveTab(key);
 
       if (focusHeading) {
@@ -80,6 +94,7 @@
         loadTemplate(btn.getAttribute('data-template'), false);
         lastTrigger = btn;
         dialog.showModal();
+        resetModalScroll();
         document.body.classList.add('modal-open');
       });
     });

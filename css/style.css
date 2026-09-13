@@ -100,6 +100,8 @@ body {
     sans-serif;
   font-weight: 400;
   line-height: 1.7;
+  word-break: keep-all;
+  overflow-wrap: break-word;
   scrollbar-width: none;
 }
 
@@ -343,6 +345,62 @@ main {
   max-width: 46ch;
   font-size: 1.05rem;
   font-weight: 400;
+}
+
+.hero-desc span {
+  display: block;
+}
+
+.hero-desc span + span:last-child {
+  margin-top: 2px;
+}
+
+.evidence-summary {
+  display: flex;
+  width: fit-content;
+  max-width: 100%;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin: 20px 0 0;
+  padding: 9px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  background: rgba(11, 11, 13, 0.55);
+  color: #f5f4f1;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.evidence-summary strong {
+  font-weight: 700;
+}
+
+.evidence-links {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 5px;
+}
+
+.evidence-link {
+  appearance: none;
+  border: 0;
+  border-radius: 3px;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 500;
+  line-height: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.evidence-link + .evidence-link::before {
+  content: "·";
+  margin-right: 5px;
+  color: #f5f4f1;
 }
 
 .hero-text .scope-details {
@@ -995,6 +1053,7 @@ main {
 
   .hero-text {
     flex: none;
+    width: min(100%, 520px);
   }
 
   .hero-divider {
@@ -1033,14 +1092,32 @@ main {
   }
 }
 
-/* ---------- Motion ---------- */
-@keyframes bob {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+@media (max-width: 520px) {
+  .evidence-summary {
+    width: 100%;
+    border-radius: 18px;
+  }
+
+  .evidence-links {
+    width: 100%;
+  }
 }
 
+/* ---------- Motion ---------- */
+@keyframes about-folder-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+/* Transforming the fixed-size frame moves only the icon visually.
+   The label remains in its original layout position, aligned with MUSIC. */
 .folder-btn[data-template="about"] .folder-icon-frame {
-  animation: bob 3.2s ease-in-out infinite;
+  animation: about-folder-float 3.2s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
