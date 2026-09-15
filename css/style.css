@@ -291,7 +291,7 @@ img {
 main {
   max-width: 1440px;
   margin: 0 auto;
-  padding: 96px 56px 64px;
+  padding: 40px 56px 24px;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -299,87 +299,174 @@ main {
 
 .desktop-hero {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 56px;
+  gap: 28px;
   flex: 1;
-  flex-wrap: wrap;
+  width: 100%;
 }
 
+/* Hero 마스트헤드: [눈썹 제목 + 이름] | 세로 구분선 | [대표 문장 + 설명 + 근거 요약] */
 .hero-text {
-  flex: 1 1 320px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(24px, 3.2vw, 48px);
+  width: 100%;
+  max-width: 1040px;
   min-width: 0;
+  text-align: left;
 }
 
+.hero-head {
+  flex: none;
+}
+
+.hero-divider {
+  flex: none;
+  align-self: stretch;
+  width: 1px;
+  background: linear-gradient(
+    180deg,
+    rgba(245, 244, 241, 0) 0%,
+    rgba(245, 244, 241, 0.5) 18%,
+    rgba(245, 244, 241, 0.5) 82%,
+    rgba(245, 244, 241, 0) 100%
+  );
+}
+
+.hero-body {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 560px;
+}
+
+/* 눈썹 제목: 작은 대문자 + 양쪽 얇은 선 */
 .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
   font-family:
     "Pretendard",
     -apple-system,
     "Malgun Gothic",
     sans-serif;
-  font-size: 1.35rem;
-  font-weight: 700;
-  letter-spacing: 0.01em;
-  color: #f5f4f1;
-  margin-bottom: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  color: rgba(245, 244, 241, 0.78);
+  margin: 0 0 8px;
 }
 
+.eyebrow::before,
+.eyebrow::after {
+  content: "";
+  width: 28px;
+  height: 1px;
+  background: rgba(245, 244, 241, 0.45);
+}
+
+/* 넓은 화면에서는 왼쪽 정렬이므로 오른쪽 선은 감춘다 */
+.eyebrow::after {
+  display: none;
+}
+
+/* 이름: 타이트한 자간 + 아래로 갈수록 살짝 푸른 그라데이션 */
 .hero-title {
-  /* font-family: 'BonmyeongjoSourceHanSerif', 'Fraunces', serif; */
-  font-family: "Pretendard";
+  font-family:
+    "Pretendard",
+    -apple-system,
+    "Malgun Gothic",
+    sans-serif;
   font-style: normal;
   font-weight: 800;
-  font-size: clamp(3.2rem, 7vw, 5.6rem);
-  margin: 0 0 24px;
+  font-size: clamp(2.1rem, 3.8vw, 3.1rem);
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  white-space: nowrap;
+  color: #ffffff;
+  margin: 0;
+}
+
+@supports (-webkit-background-clip: text) or (background-clip: text) {
+  .hero-title {
+    background: linear-gradient(180deg, #ffffff 0%, #d6e1f3 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
 }
 
 .hero-subtitle {
-  font-size: 1.3rem;
+  font-size: 1.02rem;
   font-weight: 600;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
   color: #f5f4f1;
-  margin-bottom: 16px;
+  margin: 0 0 6px;
+}
+
+/* 넓은 화면에서는 대표 문장을 한 줄로 흘린다 */
+.hero-subtitle br {
+  display: none;
 }
 
 .hero-desc {
-  color: #c9c7c2;
-  max-width: 46ch;
-  font-size: 1.05rem;
+  color: #c3cde0;
+  max-width: 56ch;
+  margin: 0;
+  font-size: 0.84rem;
   font-weight: 400;
+  line-height: 1.6;
 }
 
 .hero-desc span {
-  display: block;
+  display: inline;
 }
 
-.hero-desc span + span:last-child {
-  margin-top: 2px;
-}
-
+/* 근거 요약: Contact 바와 같은 글래스 pill */
 .evidence-summary {
   display: flex;
   width: fit-content;
   max-width: 100%;
   flex-wrap: wrap;
-  gap: 4px 10px;
-  margin: 20px 0 0;
-  padding: 9px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  align-items: center;
+  justify-content: center;
+  gap: 6px 12px;
+  margin: 14px 0 0;
+  padding: 6px 16px 6px 6px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 999px;
-  background: rgba(11, 11, 13, 0.55);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  box-shadow:
+    0 8px 28px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
   color: #f5f4f1;
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   line-height: 1.5;
 }
 
 .evidence-summary strong {
+  display: inline-block;
+  padding: 3px 11px;
+  border-radius: 999px;
+  background: #f5f4f1;
+  color: #101c30;
+  font-size: 0.72rem;
   font-weight: 700;
+  letter-spacing: 0.04em;
 }
 
 .evidence-links {
   display: inline-flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 2px 5px;
+  gap: 2px 6px;
 }
 
 .evidence-link {
@@ -392,15 +479,25 @@ main {
   font: inherit;
   font-weight: 500;
   line-height: inherit;
-  text-decoration: none;
+  text-decoration: underline;
+  text-decoration-color: rgba(245, 244, 241, 0.35);
+  text-underline-offset: 3px;
   cursor: pointer;
   white-space: nowrap;
+  transition: text-decoration-color 0.15s ease;
+}
+
+.evidence-link:hover,
+.evidence-link:focus-visible {
+  text-decoration-color: #f5f4f1;
 }
 
 .evidence-link + .evidence-link::before {
   content: "·";
-  margin-right: 5px;
-  color: #f5f4f1;
+  margin-right: 6px;
+  color: rgba(245, 244, 241, 0.6);
+  text-decoration: none;
+  display: inline-block;
 }
 
 .hero-text .scope-details {
@@ -413,19 +510,15 @@ main {
   line-height: 1.3;
 }
 
-.hero-divider {
-  align-self: stretch;
-  width: 1px;
-  background: rgba(245, 244, 241, 0.18);
-  flex: none;
-}
-
 /* ---------- Folder grid ---------- */
 .folder-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(190px, 272px));
-  gap: 44px 64px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 28px clamp(20px, 3vw, 40px);
   flex: none;
+  width: 100%;
 }
 
 .folder-btn {
@@ -433,6 +526,7 @@ main {
   border: none;
   color: #f5f4f1;
   font-family: inherit;
+  text-decoration: none;
   cursor: pointer;
   display: flex;
   flex-direction: column;
@@ -451,8 +545,8 @@ main {
 .folder-icon-frame {
   position: relative;
   display: block;
-  width: 240px;
-  height: 240px;
+  width: clamp(130px, 10vw, 170px);
+  height: clamp(130px, 10vw, 170px);
   overflow: hidden;
   filter: drop-shadow(0 14px 24px rgba(0, 0, 0, 0.45));
 }
@@ -467,15 +561,27 @@ main {
   object-fit: contain;
 }
 
+/* game_icon.png is a centered badge with lots of empty canvas around it
+   (unlike the other folder artwork, which already fills most of its frame),
+   so it needs its own zoom/position instead of the shared .folder-icon values. */
+.folder-icon-game {
+  max-width: none;
+  top: 60%;
+  width: 155%;
+  height: 155%;
+}
+
 .folder-label {
   font-size: 0.95rem;
   font-weight: 700;
   letter-spacing: 0.03em;
+  line-height: 1.2;
 }
 
 .folder-sub {
   font-size: 0.85rem;
   font-weight: 400;
+  line-height: 1.2;
   color: #c9c7c2;
 }
 
@@ -484,9 +590,9 @@ main {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 18px;
-  padding-top: 56px;
-  margin-top: 56px;
+  gap: 12px;
+  padding-top: 20px;
+  margin-top: 16px;
 }
 
 .contact-eyebrow {
@@ -500,8 +606,8 @@ main {
 .glass-pill {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 12px;
+  gap: 10px;
+  padding: 10px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.14);
   border: 1px solid rgba(255, 255, 255, 0.35);
@@ -517,8 +623,8 @@ main {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 60px;
-  height: 60px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.55);
   transition:
@@ -527,8 +633,8 @@ main {
 }
 
 .icon-link svg {
-  width: 26px;
-  height: 26px;
+  width: 22px;
+  height: 22px;
 }
 
 .icon-link:hover,
@@ -1040,24 +1146,12 @@ main {
 /* ---------- Responsive ---------- */
 @media (max-width: 1180px) {
   main {
-    padding: 72px 20px 40px;
+    padding: 48px 20px 32px;
   }
 
   .desktop-hero {
     flex: none;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
     gap: 24px;
-  }
-
-  .hero-text {
-    flex: none;
-    width: min(100%, 520px);
-  }
-
-  .hero-divider {
-    display: none;
   }
 
   .hero-text .scope-details {
@@ -1065,15 +1159,8 @@ main {
   }
 
   .folder-grid {
-    grid-template-columns: repeat(2, minmax(120px, 1fr));
-    width: 100%;
-    max-width: 500px;
-    gap: 28px 32px;
-  }
-
-  .folder-icon-frame {
-    width: 168px;
-    height: 168px;
+    max-width: 460px;
+    gap: 24px 28px;
   }
 
   .glass-pill {
@@ -1092,10 +1179,77 @@ main {
   }
 }
 
+@media (max-width: 900px) {
+  .hero-text {
+    flex-direction: column;
+    gap: 18px;
+    width: min(100%, 520px);
+    text-align: center;
+  }
+
+  .hero-head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .eyebrow {
+    text-indent: 0.28em; /* 자간으로 생긴 오른쪽 여백을 상쇄해 시각적 중앙 정렬 */
+  }
+
+  .eyebrow::after {
+    display: block;
+    margin-left: -0.28em;
+  }
+
+  .hero-title {
+    white-space: normal;
+  }
+
+  .hero-divider {
+    align-self: center;
+    width: min(100%, 220px);
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      rgba(245, 244, 241, 0) 0%,
+      rgba(245, 244, 241, 0.5) 18%,
+      rgba(245, 244, 241, 0.5) 82%,
+      rgba(245, 244, 241, 0) 100%
+    );
+  }
+
+  .hero-body {
+    max-width: 100%;
+  }
+
+  .hero-subtitle br {
+    display: inline;
+  }
+
+  .hero-desc {
+    max-width: 46ch;
+    margin: 0 auto;
+  }
+
+  .hero-desc span {
+    display: block;
+  }
+
+  .hero-desc span + span:last-child {
+    margin-top: 4px;
+  }
+
+  .evidence-summary {
+    margin: 16px auto 0;
+  }
+}
+
 @media (max-width: 520px) {
   .evidence-summary {
     width: 100%;
     border-radius: 18px;
+    padding: 10px 14px;
   }
 
   .evidence-links {
