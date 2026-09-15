@@ -1245,15 +1245,34 @@ main {
   }
 }
 
-@media (max-width: 520px) {
+@media (max-width: 560px) {
+  /* 좁은 화면에서는 "근거 요약" 배지와 링크 목록이 줄바꿈되므로
+     한 줄짜리 알약 모양 대신 왼쪽 정렬 카드로 바꾼다.
+     배지는 위, 얇은 구분선, 그 아래 링크 목록 순서로 둔다. */
   .evidence-summary {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
     width: 100%;
-    border-radius: 18px;
-    padding: 10px 14px;
+    gap: 10px;
+    border-radius: 16px;
+    padding: 14px 16px;
+  }
+
+  .evidence-summary strong {
+    align-self: flex-start;
   }
 
   .evidence-links {
     width: 100%;
+    justify-content: flex-start;
+    gap: 6px 10px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+  }
+
+  .evidence-link {
+    white-space: normal;
   }
 }
 
