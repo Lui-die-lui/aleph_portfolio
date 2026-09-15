@@ -571,6 +571,16 @@ main {
   height: 155%;
 }
 
+/* zzalkak_icon.png already fills most of its own canvas (unlike the other
+   folder artwork, which has generous padding), so it needs a smaller zoom
+   to land at the same on-screen size as the rest of the row. */
+.folder-icon-zk {
+  max-width: none;
+  top: 61%;
+  width: 64%;
+  height: 64%;
+}
+
 .folder-label {
   font-size: 0.95rem;
   font-weight: 700;
@@ -583,6 +593,20 @@ main {
   font-weight: 400;
   line-height: 1.2;
   color: #c9c7c2;
+}
+
+/* Wide desktop: force the original 5 folders onto one row and let the 6th
+   (ZK STUDIO) wrap to a second row under column 1, i.e. directly below
+   ABOUT ME. Narrower viewports keep the flex-wrap above, where ZK STUDIO
+   (last in source order) naturally lands beside INK ROOM instead. */
+@media (min-width: 1181px) {
+  .folder-grid {
+    display: grid;
+    grid-template-columns: repeat(5, auto);
+    justify-items: center;
+    column-gap: clamp(20px, 3vw, 40px);
+    row-gap: 28px;
+  }
 }
 
 /* ---------- Contact row ---------- */
