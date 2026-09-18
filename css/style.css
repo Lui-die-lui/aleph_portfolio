@@ -581,6 +581,16 @@ main {
   height: 64%;
 }
 
+/* afterwave.png is a full-bleed 3D app-icon graphic like zzalkak_icon.png
+   (not a folder-badge composition with generous padding), so it needs the
+   same small zoom to land at the same on-screen size as the rest of the row. */
+.folder-icon-afterwave {
+  max-width: none;
+  top: 61%;
+  width: 64%;
+  height: 64%;
+}
+
 .folder-label {
   font-size: 0.95rem;
   font-weight: 700;
