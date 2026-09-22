@@ -1,9 +1,9 @@
 'use strict';
 
-// cookie@2.x renamed its API (no more `parse`/`serialize`) — parseCookie
-// reads a request's Cookie header, stringifySetCookie builds one Set-Cookie
-// header entry. See node_modules/cookie's .d.ts for the current shape.
-const { parseCookie, stringifySetCookie } = require('cookie');
+// parseCookie reads a request's Cookie header, stringifySetCookie builds
+// one Set-Cookie header entry. See ./cookie.js for why this is a small
+// local implementation rather than the `cookie` npm package.
+const { parseCookie, stringifySetCookie } = require('./cookie');
 const { query } = require('./db');
 const { hmacHex, randomToken } = require('./crypto');
 
