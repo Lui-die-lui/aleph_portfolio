@@ -1,11 +1,11 @@
 'use strict';
 
 const { generateRegistrationOptions } = require('@simplewebauthn/server');
-const { requireSession } = require('../../_lib/session');
-const { recordChallenge } = require('../../_lib/challenge');
-const { listCredentialDescriptorsByUser } = require('../../_lib/passkeys');
-const { config } = require('../../_lib/webauthn');
-const { sendJson, methodNotAllowed, withErrorBoundary } = require('../../_lib/http');
+const { requireSession } = require('../session');
+const { recordChallenge } = require('../challenge');
+const { listCredentialDescriptorsByUser } = require('../passkeys');
+const { config } = require('../webauthn');
+const { sendJson, methodNotAllowed, withErrorBoundary } = require('../http');
 
 // Adding a passkey (the 1st or the 5th) always requires an existing,
 // logged-in session — there is no unauthenticated way to reach this route.

@@ -1,7 +1,7 @@
 'use strict';
 
-const { requireSession } = require('../_lib/session');
-const { sendJson, methodNotAllowed, withErrorBoundary } = require('../_lib/http');
+const { requireSession } = require('../session');
+const { sendJson, methodNotAllowed, withErrorBoundary } = require('../http');
 
 // Never trusts a client-supplied identifier — the only input is the
 // HttpOnly session cookie itself.

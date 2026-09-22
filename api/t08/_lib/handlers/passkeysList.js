@@ -1,8 +1,8 @@
 'use strict';
 
-const { requireSession } = require('../_lib/session');
-const { listByUser } = require('../_lib/passkeys');
-const { sendJson, methodNotAllowed, withErrorBoundary } = require('../_lib/http');
+const { requireSession } = require('../session');
+const { listByUser } = require('../passkeys');
+const { sendJson, methodNotAllowed, withErrorBoundary } = require('../http');
 
 // Masks credential_id (front/back only) — it isn't secret, but the
 // submission doc convention (and this UI) avoids printing it in full.

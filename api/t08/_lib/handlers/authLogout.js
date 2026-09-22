@@ -1,7 +1,7 @@
 'use strict';
 
-const { readSessionCookie, revokeSession } = require('../_lib/session');
-const { sendJson, methodNotAllowed, withErrorBoundary } = require('../_lib/http');
+const { readSessionCookie, revokeSession } = require('../session');
+const { sendJson, methodNotAllowed, withErrorBoundary } = require('../http');
 
 module.exports = withErrorBoundary(async (req, res) => {
   if (req.method !== 'POST') return methodNotAllowed(res, ['POST']);

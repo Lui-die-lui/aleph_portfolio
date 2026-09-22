@@ -21,33 +21,27 @@ const MIME = {
   '.json': 'application/json; charset=utf-8',
 };
 
+// Only the bootstrap/invite routes (their own, flag-gated/rarely-used
+// functions) are listed individually here. Every other /api/t08/* route —
+// auth/*, passkeys, passkeys/:id, passkeys/register/* — is handled by the
+// single catch-all handler below, exactly as Vercel routes them: a static
+// path listed here wins if present, otherwise it falls through to the
+// catch-all. This mirrors the deployed function layout under api/t08/.
 const routes = [
-  ['POST', '/api/t08/passkeys/register/options', 'api/t08/passkeys/register/options.js'],
-  ['POST', '/api/t08/passkeys/register/verify', 'api/t08/passkeys/register/verify.js'],
-  ['GET', '/api/t08/passkeys', 'api/t08/passkeys/index.js'],
-  ['POST', '/api/t08/auth/options', 'api/t08/auth/options.js'],
-  ['POST', '/api/t08/auth/verify', 'api/t08/auth/verify.js'],
-  ['POST', '/api/t08/auth/logout', 'api/t08/auth/logout.js'],
-  ['GET', '/api/t08/auth/session', 'api/t08/auth/session.js'],
-  ['GET', '/api/t08/private-items', 'api/t08/private-items.js'],
   ['POST', '/api/t08/bootstrap/register/options', 'api/t08/bootstrap/register/options.js'],
   ['POST', '/api/t08/bootstrap/register/verify', 'api/t08/bootstrap/register/verify.js'],
   ['POST', '/api/t08/invite/register/options', 'api/t08/invite/register/options.js'],
   ['POST', '/api/t08/invite/register/verify', 'api/t08/invite/register/verify.js'],
 ];
 
-function matchDynamicPasskey(method, pathname) {
-  if (method !== 'DELETE') return null;
-  const m = pathname.match(/^\/api\/t08\/passkeys\/([^/]+)$/);
-  if (!m || m[1] === 'register') return null;
-  return 'api/t08/passkeys/[id].js';
-}
+const T08_CATCH_ALL = 'api/t08/[...path].js';
 
 function findRoute(method, pathname) {
   for (const [routeMethod, routePath, file] of routes) {
     if (routeMethod === method && routePath === pathname) return file;
   }
-  return matchDynamicPasskey(method, pathname);
+  if (pathname.startsWith('/api/t08/')) return T08_CATCH_ALL;
+  return null;
 }
 
 function serveStatic(req, res, pathname) {
