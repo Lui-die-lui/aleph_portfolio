@@ -1,7 +1,7 @@
 'use strict';
 
 const { requireSession } = require('../session');
-const { query } = require('../db');
+const { listByUser } = require('../privateItems');
 const { sendJson, methodNotAllowed, withErrorBoundary } = require('../http');
 
 // Ownership is always derived from the session, never from a query string
@@ -12,13 +12,6 @@ module.exports = withErrorBoundary(async (req, res) => {
   const session = await requireSession(req);
   if (!session) return sendJson(res, 401, { error: 'not_authenticated' });
 
-  const result = await query(
-    `select id, title, content, category, created_at, updated_at
-       from t08_private_items
-      where user_id = $1
-      order by created_at asc`,
-    [session.userId]
-  );
-
-  sendJson(res, 200, { items: result.rows });
+  const items = await listByUser(session.userId);
+  sendJson(res, 200, { items });
 });

@@ -35,7 +35,10 @@ const authOptions = require('./_lib/handlers/authOptions');
 const authVerify = require('./_lib/handlers/authVerify');
 const authLogout = require('./_lib/handlers/authLogout');
 const authSession = require('./_lib/handlers/authSession');
-const privateItems = require('./_lib/handlers/privateItems');
+const privateItemsList = require('./_lib/handlers/privateItemsList');
+const privateItemsCreate = require('./_lib/handlers/privateItemsCreate');
+const privateItemsUpdate = require('./_lib/handlers/privateItemsUpdate');
+const privateItemsDelete = require('./_lib/handlers/privateItemsDelete');
 const passkeysList = require('./_lib/handlers/passkeysList');
 const passkeysDelete = require('./_lib/handlers/passkeysDelete');
 const passkeysRegisterOptions = require('./_lib/handlers/passkeysRegisterOptions');
@@ -68,7 +71,10 @@ module.exports = async function handler(req, res) {
     return authSession(req, res);
   }
   if (method === 'GET' && key === 'private-items') {
-    return privateItems(req, res);
+    return privateItemsList(req, res);
+  }
+  if (method === 'POST' && key === 'private-items') {
+    return privateItemsCreate(req, res);
   }
   if (method === 'GET' && key === 'passkeys') {
     return passkeysList(req, res);
@@ -77,6 +83,13 @@ module.exports = async function handler(req, res) {
   // (which is reserved for the register/options|verify routes above).
   if (method === 'DELETE' && tail.length === 2 && tail[0] === 'passkeys' && tail[1] !== 'register') {
     return passkeysDelete(req, res);
+  }
+  // PATCH/DELETE /api/t08/private-items/:id
+  if (method === 'PATCH' && tail.length === 2 && tail[0] === 'private-items') {
+    return privateItemsUpdate(req, res);
+  }
+  if (method === 'DELETE' && tail.length === 2 && tail[0] === 'private-items') {
+    return privateItemsDelete(req, res);
   }
 
   sendJson(res, 404, { error: 'not_found' });

@@ -1370,15 +1370,10 @@ body.reduce-motion .folder-btn[data-template="about"] .folder-icon-frame {
 
 /* ---------- t08: PRIVATE ARCHIVE (passkey-gated) ---------- */
 /* Opened from its own folder icon in the grid; reuses .modal / .modal-panel
-   / .modal-tabs / .modal-close so it matches the other folder dialogs. */
-.t08-archive-title {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 700;
-}
-
+   / .modal-tabs / .modal-close / .modal h2 so it matches the other folder
+   dialogs exactly (same title size/position, same content padding). */
 .t08-archive-content {
-  padding: 4px 40px 32px;
+  padding: 4px 40px 36px;
 }
 
 .t08-archive-desc {
@@ -1516,18 +1511,117 @@ body.reduce-motion .folder-btn[data-template="about"] .folder-icon-frame {
   font-size: 0.85rem;
   line-height: 1.6;
   color: rgba(245, 244, 241, 0.85);
+  white-space: pre-wrap;
+}
+
+/* Edit/delete stay out of the way until the card is hovered or focused
+   (keyboard tab lands inside it) — desktop only. Mobile has no hover, so
+   they're always visible there (see the max-width: 640px block below). */
+.t08-item-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.t08-item:hover .t08-item-actions,
+.t08-item:focus-within .t08-item-actions {
+  opacity: 1;
+}
+
+.t08-item-edit,
+.t08-item-delete {
+  font-family: inherit;
+  border-radius: 999px;
+  padding: 5px 14px;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.t08-item-edit {
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: transparent;
+  color: #f5f4f1;
+}
+
+.t08-item-edit:hover,
+.t08-item-edit:focus-visible {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.t08-item-delete {
+  border: 1px solid rgba(255, 138, 101, 0.55);
+  background: transparent;
+  color: #ff9f8a;
+}
+
+.t08-item-delete:hover,
+.t08-item-delete:focus-visible {
+  background: rgba(255, 138, 101, 0.16);
+}
+
+.t08-item-edit:disabled,
+.t08-item-delete:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Inline add/edit form — replaces a card's view content in place, no
+   separate page or modal-within-a-modal. */
+.t08-item-form {
+  display: grid;
+  gap: 10px;
+}
+
+.t08-item-form label {
+  display: block;
+  font-size: 0.78rem;
+  color: rgba(245, 244, 241, 0.7);
+  margin-bottom: 4px;
+}
+
+.t08-item-form input,
+.t08-item-form textarea {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+  font-size: 0.85rem;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.06);
+  color: #f5f4f1;
+}
+
+.t08-item-form textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.t08-item-form-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.t08-item-status {
+  min-height: 1.1em;
+  margin: 0;
+  font-size: 0.78rem;
+}
+
+.t08-item-empty {
+  margin: 0;
+  font-size: 0.85rem;
+  color: rgba(245, 244, 241, 0.6);
 }
 
 /* Passkey management modal reuses .modal / .modal-panel / .modal-tabs /
-   .modal-close so it matches the existing dialog styling exactly. */
-.t08-manage-title {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 700;
-}
-
+   .modal-close / .modal h2 so it matches the existing dialog styling
+   exactly. */
 .t08-manage-content {
-  padding: 4px 40px 32px;
+  padding: 4px 40px 36px;
 }
 
 .t08-passkey-list {
@@ -1613,8 +1707,18 @@ body.reduce-motion .folder-btn[data-template="about"] .folder-icon-frame {
     flex-direction: column;
     align-items: flex-start;
   }
+  .t08-unlocked-actions {
+    width: 100%;
+  }
+  .t08-unlocked-actions .t08-btn {
+    flex: 1 1 auto;
+  }
   .t08-manage-content,
   .t08-archive-content {
     padding: 4px 20px 24px;
+  }
+  /* No hover on touch devices — edit/delete must always be reachable. */
+  .t08-item-actions {
+    opacity: 1;
   }
 }

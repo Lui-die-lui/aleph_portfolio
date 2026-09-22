@@ -15,6 +15,8 @@
   var statusEl = document.getElementById('t08-login-status');
   var welcomeEl = document.getElementById('t08-welcome');
   var itemsEl = document.getElementById('t08-items');
+  var itemsStatusEl = document.getElementById('t08-items-status');
+  var addItemBtn = document.getElementById('t08-add-item-btn');
   var logoutBtn = document.getElementById('t08-logout-btn');
   var manageBtn = document.getElementById('t08-manage-btn');
   var manageModal = document.getElementById('t08-manage-modal');
@@ -75,38 +77,273 @@
   function showLocked() {
     lockedEl.hidden = false;
     unlockedEl.hidden = true;
+    resetItemEditingState();
   }
 
-  function renderItems(items) {
+  // Must match the server-side limits in api/t08/_lib/privateItems.js —
+  // this is only a client-side head start (a nicer error before the round
+  // trip); the server re-checks everything regardless.
+  var FIELD_LIMITS = { title: 200, category: 60, content: 8000 };
+
+  // All state for the items list lives here, not scattered across the DOM:
+  // the list is always rebuilt from latestItems + which id (if any) is
+  // being edited, so the rendered cards can never drift from server data.
+  var latestItems = [];
+  var editingItemId = null;
+  var creatingNew = false;
+
+  function resetItemEditingState() {
+    latestItems = [];
+    editingItemId = null;
+    creatingNew = false;
+  }
+
+  function serverErrorMessage(status, code) {
+    var map = {
+      title_required: '제목을 입력해주세요.',
+      title_too_long: '제목이 너무 깁니다 (' + FIELD_LIMITS.title + '자 이하).',
+      category_required: '카테고리를 입력해주세요.',
+      category_too_long: '카테고리가 너무 깁니다 (' + FIELD_LIMITS.category + '자 이하).',
+      content_required: '내용을 입력해주세요.',
+      content_too_long: '내용이 너무 깁니다 (' + FIELD_LIMITS.content + '자 이하).',
+      not_authenticated: '로그인이 만료되었습니다. 다시 로그인해주세요.',
+      not_found: '이미 삭제되었거나 접근할 수 없는 기록입니다.',
+    };
+    if (code && map[code]) return map[code];
+    if (status === 401) return '로그인이 만료되었습니다. 다시 로그인해주세요.';
+    return '저장하지 못했습니다. 잠시 후 다시 시도해주세요.';
+  }
+
+  function validateItemFields(fields) {
+    var title = (fields.title || '').trim();
+    var category = (fields.category || '').trim();
+    var content = (fields.content || '').trim();
+    if (!title) return '제목을 입력해주세요.';
+    if (title.length > FIELD_LIMITS.title) return serverErrorMessage(null, 'title_too_long');
+    if (!category) return '카테고리를 입력해주세요.';
+    if (category.length > FIELD_LIMITS.category) return serverErrorMessage(null, 'category_too_long');
+    if (!content) return '내용을 입력해주세요.';
+    if (content.length > FIELD_LIMITS.content) return serverErrorMessage(null, 'content_too_long');
+    return null;
+  }
+
+  function buildItemView(item) {
+    var li = document.createElement('li');
+    li.className = 't08-item';
+
+    var head = document.createElement('div');
+    head.className = 't08-item-head';
+    var h3 = document.createElement('h3');
+    h3.textContent = item.title;
+    var cat = document.createElement('span');
+    cat.className = 't08-item-category';
+    cat.textContent = item.category;
+    head.appendChild(h3);
+    head.appendChild(cat);
+
+    var p = document.createElement('p');
+    p.textContent = item.content;
+
+    var actions = document.createElement('div');
+    actions.className = 't08-item-actions';
+
+    var editBtn = document.createElement('button');
+    editBtn.type = 'button';
+    editBtn.className = 't08-item-edit';
+    editBtn.textContent = '수정';
+    editBtn.setAttribute('aria-label', item.title + ' 수정');
+    editBtn.addEventListener('click', function () {
+      creatingNew = false;
+      editingItemId = item.id;
+      setStatus(itemsStatusEl, '', null);
+      renderItems();
+    });
+
+    var delBtn = document.createElement('button');
+    delBtn.type = 'button';
+    delBtn.className = 't08-item-delete';
+    delBtn.textContent = '삭제';
+    delBtn.setAttribute('aria-label', item.title + ' 삭제');
+    delBtn.addEventListener('click', function () {
+      confirmDeleteItem(item);
+    });
+
+    actions.appendChild(editBtn);
+    actions.appendChild(delBtn);
+
+    li.appendChild(head);
+    li.appendChild(p);
+    li.appendChild(actions);
+    return li;
+  }
+
+  function buildItemForm(item) {
+    var li = document.createElement('li');
+    li.className = 't08-item t08-item-editing';
+
+    var form = document.createElement('div');
+    form.className = 't08-item-form';
+
+    var titleLabel = document.createElement('label');
+    titleLabel.textContent = '제목';
+    var titleInput = document.createElement('input');
+    titleInput.type = 'text';
+    titleInput.maxLength = FIELD_LIMITS.title;
+    titleInput.value = item ? item.title : '';
+    titleLabel.appendChild(titleInput);
+
+    var categoryLabel = document.createElement('label');
+    categoryLabel.textContent = '카테고리';
+    var categoryInput = document.createElement('input');
+    categoryInput.type = 'text';
+    categoryInput.maxLength = FIELD_LIMITS.category;
+    categoryInput.value = item ? item.category : '';
+    categoryLabel.appendChild(categoryInput);
+
+    var contentLabel = document.createElement('label');
+    contentLabel.textContent = '내용';
+    var contentInput = document.createElement('textarea');
+    contentInput.maxLength = FIELD_LIMITS.content;
+    contentInput.value = item ? item.content : '';
+    contentLabel.appendChild(contentInput);
+
+    var formStatus = document.createElement('p');
+    formStatus.className = 't08-item-status';
+    formStatus.setAttribute('role', 'status');
+    formStatus.setAttribute('aria-live', 'polite');
+
+    var actions = document.createElement('div');
+    actions.className = 't08-item-form-actions';
+
+    var saveBtn = document.createElement('button');
+    saveBtn.type = 'button';
+    saveBtn.className = 't08-btn t08-btn-primary';
+    saveBtn.textContent = '저장';
+
+    var cancelBtn = document.createElement('button');
+    cancelBtn.type = 'button';
+    cancelBtn.className = 't08-btn t08-btn-ghost';
+    cancelBtn.textContent = '취소';
+
+    cancelBtn.addEventListener('click', function () {
+      if (!item) creatingNew = false;
+      else editingItemId = null;
+      renderItems();
+    });
+
+    saveBtn.addEventListener('click', function () {
+      saveItem(
+        item,
+        { title: titleInput.value, category: categoryInput.value, content: contentInput.value },
+        { saveBtn: saveBtn, cancelBtn: cancelBtn, statusEl: formStatus }
+      );
+    });
+
+    actions.appendChild(saveBtn);
+    actions.appendChild(cancelBtn);
+
+    form.appendChild(titleLabel);
+    form.appendChild(categoryLabel);
+    form.appendChild(contentLabel);
+    form.appendChild(formStatus);
+    form.appendChild(actions);
+
+    li.appendChild(form);
+    return li;
+  }
+
+  function renderItems() {
     if (!itemsEl) return;
     itemsEl.innerHTML = '';
-    items.forEach(function (item) {
-      var li = document.createElement('li');
-      li.className = 't08-item';
 
-      var head = document.createElement('div');
-      head.className = 't08-item-head';
-      var h3 = document.createElement('h3');
-      h3.textContent = item.title;
-      var cat = document.createElement('span');
-      cat.className = 't08-item-category';
-      cat.textContent = item.category;
-      head.appendChild(h3);
-      head.appendChild(cat);
+    if (addItemBtn) addItemBtn.disabled = creatingNew;
 
-      var p = document.createElement('p');
-      p.textContent = item.content;
+    if (creatingNew) {
+      itemsEl.appendChild(buildItemForm(null));
+    }
 
-      li.appendChild(head);
-      li.appendChild(p);
-      itemsEl.appendChild(li);
+    if (latestItems.length === 0 && !creatingNew) {
+      var empty = document.createElement('li');
+      empty.className = 't08-item-empty';
+      empty.textContent = '아직 등록된 기록이 없습니다.';
+      itemsEl.appendChild(empty);
+      return;
+    }
+
+    latestItems.forEach(function (item) {
+      itemsEl.appendChild(item.id === editingItemId ? buildItemForm(item) : buildItemView(item));
     });
   }
 
+  // Always re-fetches from the server after any mutation, rather than
+  // patching the DOM optimistically — the list on screen must reflect
+  // what is actually in the database, never a client-only guess.
   function loadPrivateItems() {
     return fetchJson('/api/t08/private-items').then(function (result) {
-      if (result.ok) renderItems(result.body.items || []);
+      if (result.ok) {
+        latestItems = result.body.items || [];
+        renderItems();
+      }
     });
+  }
+
+  function saveItem(item, fields, ui) {
+    var clientError = validateItemFields(fields);
+    if (clientError) {
+      setStatus(ui.statusEl, clientError, 'error');
+      return;
+    }
+
+    setStatus(ui.statusEl, '저장 중...', 'info');
+    ui.saveBtn.disabled = true;
+    ui.cancelBtn.disabled = true;
+
+    var payload = {
+      title: fields.title.trim(),
+      category: fields.category.trim(),
+      content: fields.content.trim(),
+    };
+    var isCreate = !item;
+    var request = isCreate
+      ? fetchJson('/api/t08/private-items', { method: 'POST', body: JSON.stringify(payload) })
+      : fetchJson('/api/t08/private-items/' + encodeURIComponent(item.id), {
+          method: 'PATCH',
+          body: JSON.stringify(payload),
+        });
+
+    request
+      .then(function (result) {
+        if (!result.ok) {
+          throw serverErrorMessage(result.status, result.body && result.body.error);
+        }
+        creatingNew = false;
+        editingItemId = null;
+        setStatus(itemsStatusEl, isCreate ? '새 기록을 추가했습니다.' : '수정했습니다.', 'info');
+        return loadPrivateItems();
+      })
+      .catch(function (message) {
+        setStatus(ui.statusEl, typeof message === 'string' ? message : serverErrorMessage(), 'error');
+        ui.saveBtn.disabled = false;
+        ui.cancelBtn.disabled = false;
+      });
+  }
+
+  function confirmDeleteItem(item) {
+    var ok = window.confirm('"' + item.title + '" 기록을 삭제할까요? 이 작업은 되돌릴 수 없습니다.');
+    if (!ok) return;
+
+    setStatus(itemsStatusEl, '삭제 중...', 'info');
+    fetchJson('/api/t08/private-items/' + encodeURIComponent(item.id), { method: 'DELETE' })
+      .then(function (result) {
+        if (!result.ok) {
+          throw serverErrorMessage(result.status, result.body && result.body.error);
+        }
+        setStatus(itemsStatusEl, '삭제했습니다.', 'info');
+        return loadPrivateItems();
+      })
+      .catch(function (message) {
+        setStatus(itemsStatusEl, typeof message === 'string' ? message : serverErrorMessage(), 'error');
+      });
   }
 
   function checkSession() {
@@ -268,6 +505,17 @@
 
   loginBtn.addEventListener('click', login);
   if (logoutBtn) logoutBtn.addEventListener('click', logout);
+  if (addItemBtn) {
+    addItemBtn.addEventListener('click', function () {
+      if (creatingNew) return;
+      editingItemId = null;
+      creatingNew = true;
+      setStatus(itemsStatusEl, '', null);
+      renderItems();
+      var firstInput = itemsEl && itemsEl.querySelector('.t08-item-editing input');
+      if (firstInput) firstInput.focus();
+    });
+  }
   if (manageBtn && manageModal) {
     manageBtn.addEventListener('click', function () {
       setStatus(manageStatusEl, '', null);
