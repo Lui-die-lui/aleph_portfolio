@@ -1,9 +1,9 @@
 'use strict';
 
 const { generateAuthenticationOptions } = require('@simplewebauthn/server');
-const { recordChallenge } = require('../_lib/challenge');
-const { config } = require('../_lib/webauthn');
-const { sendJson, methodNotAllowed, withErrorBoundary } = require('../_lib/http');
+const { recordChallenge } = require('../challenge');
+const { config } = require('../webauthn');
+const { sendJson, methodNotAllowed, withErrorBoundary } = require('../http');
 
 // Usernameless (discoverable-credential) login: no allowCredentials list is
 // sent, so the browser lets the user pick from whichever passkeys for this

@@ -1,11 +1,11 @@
 'use strict';
 
 const { verifyRegistrationResponse } = require('@simplewebauthn/server');
-const { requireSession } = require('../../_lib/session');
-const { consumeChallenge } = require('../../_lib/challenge');
-const { insert } = require('../../_lib/passkeys');
-const { config } = require('../../_lib/webauthn');
-const { readJsonBody, sendJson, methodNotAllowed, withErrorBoundary } = require('../../_lib/http');
+const { requireSession } = require('../session');
+const { consumeChallenge } = require('../challenge');
+const { insert } = require('../passkeys');
+const { config } = require('../webauthn');
+const { readJsonBody, sendJson, methodNotAllowed, withErrorBoundary } = require('../http');
 
 module.exports = withErrorBoundary(async (req, res) => {
   if (req.method !== 'POST') return methodNotAllowed(res, ['POST']);

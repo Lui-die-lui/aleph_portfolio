@@ -1,8 +1,8 @@
 'use strict';
 
-const { requireSession } = require('./_lib/session');
-const { query } = require('./_lib/db');
-const { sendJson, methodNotAllowed, withErrorBoundary } = require('./_lib/http');
+const { requireSession } = require('../session');
+const { query } = require('../db');
+const { sendJson, methodNotAllowed, withErrorBoundary } = require('../http');
 
 // Ownership is always derived from the session, never from a query string
 // or request body. A ?userId=... on this route is ignored entirely.

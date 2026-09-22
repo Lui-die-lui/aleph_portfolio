@@ -1,8 +1,8 @@
 'use strict';
 
-const { requireSession } = require('../_lib/session');
-const { deleteOwned } = require('../_lib/passkeys');
-const { sendJson, methodNotAllowed, withErrorBoundary } = require('../_lib/http');
+const { requireSession } = require('../session');
+const { deleteOwned } = require('../passkeys');
+const { sendJson, methodNotAllowed, withErrorBoundary } = require('../http');
 
 // Reads the id from the URL path directly (not req.query/req.params) so
 // this handler behaves identically under Vercel's Node runtime and under
