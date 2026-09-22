@@ -1,2 +1,16 @@
 # Resume PDFs contain phone number, address, and photo — never commit these.
 /portfolio/
+
+.env*
+
+# Dependencies
+node_modules/
+
+# Logs
+npm-debug.log*
+*.log
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+.vscode/

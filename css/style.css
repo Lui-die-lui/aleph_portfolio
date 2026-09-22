@@ -591,6 +591,16 @@ main {
   height: 64%;
 }
 
+/* key.png is a full-bleed graphic like zzalkak_icon.png / afterwave.png
+   (not a folder-badge composition with generous padding), so it needs the
+   same small zoom to land at the same on-screen size as the rest of the row. */
+.folder-icon-key {
+  max-width: none;
+  top: 61%;
+  width: 64%;
+  height: 64%;
+}
+
 .folder-label {
   font-size: 0.95rem;
   font-weight: 700;
@@ -1356,4 +1366,255 @@ body.reduce-motion .folder-btn {
 
 body.reduce-motion .folder-btn[data-template="about"] .folder-icon-frame {
   animation: none !important;
+}
+
+/* ---------- t08: PRIVATE ARCHIVE (passkey-gated) ---------- */
+/* Opened from its own folder icon in the grid; reuses .modal / .modal-panel
+   / .modal-tabs / .modal-close so it matches the other folder dialogs. */
+.t08-archive-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.t08-archive-content {
+  padding: 4px 40px 32px;
+}
+
+.t08-archive-desc {
+  margin: 0 0 16px;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: rgba(245, 244, 241, 0.85);
+  max-width: 56ch;
+}
+
+.t08-archive-note {
+  margin: 12px 0 0;
+  font-size: 0.78rem;
+  color: rgba(245, 244, 241, 0.6);
+}
+
+.t08-btn {
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.t08-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.t08-btn-primary {
+  border: 1px solid #e6b25a;
+  background: rgba(230, 178, 90, 0.14);
+  color: #f5f4f1;
+}
+
+.t08-btn-primary:hover:not(:disabled),
+.t08-btn-primary:focus-visible:not(:disabled) {
+  background: #e6b25a;
+  color: #101c30;
+  transform: translateY(-1px);
+}
+
+.t08-btn-ghost {
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: transparent;
+  color: #f5f4f1;
+}
+
+.t08-btn-ghost:hover:not(:disabled),
+.t08-btn-ghost:focus-visible:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.t08-login-status,
+.t08-manage-status {
+  min-height: 1.2em;
+  margin: 10px 0 0;
+  font-size: 0.82rem;
+}
+
+.t08-status-info {
+  color: rgba(245, 244, 241, 0.75);
+}
+
+.t08-status-error {
+  color: #ff9f8a;
+}
+
+.t08-unlocked-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.t08-welcome {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.t08-unlocked-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.t08-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.t08-item {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.t08-item-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.t08-item h3 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.t08-item-category {
+  font-size: 0.72rem;
+  color: #e6b25a;
+  letter-spacing: 0.04em;
+}
+
+.t08-item p {
+  margin: 8px 0 0;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: rgba(245, 244, 241, 0.85);
+}
+
+/* Passkey management modal reuses .modal / .modal-panel / .modal-tabs /
+   .modal-close so it matches the existing dialog styling exactly. */
+.t08-manage-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.t08-manage-content {
+  padding: 4px 40px 32px;
+}
+
+.t08-passkey-list {
+  list-style: none;
+  margin: 0 0 18px;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.t08-passkey-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+  padding: 10px 14px;
+}
+
+.t08-passkey-row strong {
+  font-size: 0.88rem;
+}
+
+.t08-passkey-meta {
+  margin: 4px 0 0;
+  font-size: 0.75rem;
+  color: rgba(245, 244, 241, 0.6);
+}
+
+.t08-passkey-delete {
+  font-family: inherit;
+  flex: none;
+  border: 1px solid rgba(255, 138, 101, 0.55);
+  background: transparent;
+  color: #ff9f8a;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.t08-passkey-delete:hover:not(:disabled) {
+  background: rgba(255, 138, 101, 0.16);
+}
+
+.t08-passkey-delete:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.t08-add-passkey label {
+  display: block;
+  font-size: 0.78rem;
+  color: rgba(245, 244, 241, 0.7);
+  margin-bottom: 6px;
+}
+
+.t08-add-passkey-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.t08-add-passkey-row input {
+  flex: 1 1 200px;
+  min-width: 0;
+  font-family: inherit;
+  font-size: 0.85rem;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.06);
+  color: #f5f4f1;
+}
+
+.t08-add-passkey-row input::placeholder {
+  color: rgba(245, 244, 241, 0.45);
+}
+
+@media (max-width: 640px) {
+  .t08-unlocked-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .t08-manage-content,
+  .t08-archive-content {
+    padding: 4px 20px 24px;
+  }
 }

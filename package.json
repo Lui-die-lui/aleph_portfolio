@@ -1,0 +1,22 @@
+{
+  "name": "aleph-portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Public portfolio site + passkey-protected PRIVATE ARCHIVE (task t08)",
+  "type": "commonjs",
+  "scripts": {
+    "dev": "node --env-file=.env server.js",
+    "t08:migrate": "node --env-file=.env scripts/t08-migrate.js",
+    "t08:create-invite": "node --env-file=.env scripts/t08-create-invite.js",
+    "t08:seed-items": "node --env-file=.env scripts/t08-seed-private-items.js",
+    "test": "node --env-file=.env --test test/t08/*.test.js"
+  },
+  "dependencies": {
+    "@simplewebauthn/server": "14.0.2",
+    "cookie": "2.0.1",
+    "pg": "8.23.0"
+  },
+  "devDependencies": {
+    "@simplewebauthn/browser": "14.0.0"
+  }
+}

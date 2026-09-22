@@ -184,6 +184,26 @@
             <span class="folder-sub">자사몰·오픈마켓 실무</span>
           </button>
 
+          <button
+            type="button"
+            class="folder-btn"
+            id="t08-open-btn"
+            aria-haspopup="dialog"
+            aria-label="PRIVATE ARCHIVE 열기 (패스키 필요)"
+          >
+            <span class="folder-icon-frame">
+              <img
+                src="image/key.png"
+                alt=""
+                class="folder-icon folder-icon-key"
+                width="140"
+                height="140"
+              />
+            </span>
+            <span class="folder-label">PRIVATE ARCHIVE</span>
+            <span class="folder-sub">패스키로 열기</span>
+          </button>
+
           <a
             class="folder-btn"
             href="https://ink-room-five.vercel.app/"
@@ -418,6 +438,141 @@
           </button>
         </nav>
         <div id="modal-content"></div>
+      </div>
+    </dialog>
+
+    <!-- PRIVATE ARCHIVE passkey login (component) -->
+    <dialog
+      class="modal t08-archive-modal"
+      id="t08-archive-modal"
+      aria-labelledby="t08-archive-title"
+    >
+      <div class="modal-panel">
+        <nav class="modal-tabs" aria-label="Private Archive">
+          <h2 id="t08-archive-title" class="t08-archive-title">
+            패스키로 보호된 공간
+          </h2>
+          <button
+            type="button"
+            class="modal-close"
+            data-close
+            aria-label="닫기"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="18"
+              height="18"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path
+                d="M5 5l14 14M19 5L5 19"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
+        </nav>
+        <div class="t08-archive-content">
+          <div id="t08-locked" class="t08-locked">
+            <p class="t08-archive-desc">
+              여기서부터는 비밀번호가 아니라 이 기기에 등록된 패스키(생체
+              인증·보안 키)로만 열립니다.
+            </p>
+            <button type="button" id="t08-login-btn" class="t08-btn t08-btn-primary">
+              패스키로 열기
+            </button>
+            <p class="t08-archive-note">
+              비밀번호·이메일·SNS 로그인을 사용하지 않습니다.
+            </p>
+            <p
+              id="t08-login-status"
+              class="t08-login-status"
+              role="status"
+              aria-live="polite"
+            ></p>
+          </div>
+
+          <div id="t08-unlocked" class="t08-unlocked" hidden>
+            <div class="t08-unlocked-head">
+              <p id="t08-welcome" class="t08-welcome"></p>
+              <div class="t08-unlocked-actions">
+                <button
+                  type="button"
+                  id="t08-manage-btn"
+                  class="t08-btn t08-btn-ghost"
+                  aria-haspopup="dialog"
+                >
+                  패스키 관리
+                </button>
+                <button type="button" id="t08-logout-btn" class="t08-btn t08-btn-ghost">
+                  로그아웃
+                </button>
+              </div>
+            </div>
+            <ul id="t08-items" class="t08-items"></ul>
+          </div>
+        </div>
+      </div>
+    </dialog>
+
+    <!-- PRIVATE ARCHIVE passkey management (component) -->
+    <dialog
+      class="modal t08-manage-modal"
+      id="t08-manage-modal"
+      aria-labelledby="t08-manage-title"
+    >
+      <div class="modal-panel">
+        <nav class="modal-tabs" aria-label="패스키 관리">
+          <h2 id="t08-manage-title" class="t08-manage-title">패스키 관리</h2>
+          <button
+            type="button"
+            class="modal-close"
+            data-close
+            aria-label="닫기"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="18"
+              height="18"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path
+                d="M5 5l14 14M19 5L5 19"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
+        </nav>
+        <div class="t08-manage-content">
+          <ul id="t08-passkey-list" class="t08-passkey-list"></ul>
+
+          <div class="t08-add-passkey">
+            <label for="t08-new-device-name">새 패스키 이름</label>
+            <div class="t08-add-passkey-row">
+              <input
+                type="text"
+                id="t08-new-device-name"
+                placeholder="예: 이 노트북"
+                maxlength="80"
+              />
+              <button type="button" id="t08-add-passkey-btn" class="t08-btn t08-btn-primary">
+                새 패스키 추가
+              </button>
+            </div>
+          </div>
+
+          <p
+            id="t08-manage-status"
+            class="t08-manage-status"
+            role="status"
+            aria-live="polite"
+          ></p>
+        </div>
       </div>
     </dialog>
 
@@ -1112,5 +1267,7 @@
     </template>
 
     <script src="js/script.js"></script>
+    <script src="js/vendor/simplewebauthn-browser.js"></script>
+    <script src="js/t08-auth.js"></script>
   </body>
 </html>
