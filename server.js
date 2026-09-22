@@ -34,7 +34,7 @@ const routes = [
   ['POST', '/api/t08/invite/register/verify', 'api/t08/invite/register/verify.js'],
 ];
 
-const T08_CATCH_ALL = 'api/t08/[...path].js';
+const T08_CATCH_ALL = 'api/t08/dispatch.js';
 
 function findRoute(method, pathname) {
   for (const [routeMethod, routePath, file] of routes) {

@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/api/t08/(.*)", "destination": "/api/t08/dispatch" }
+  ]
+}

@@ -8,14 +8,25 @@
 // copied unchanged from its original standalone route file into
 // ./_lib/handlers/*.js. Nothing about auth/security behavior changed here.
 //
+// This file is deliberately named plainly (not `[...path].js`). Vercel's
+// zero-config bracket catch-all only reliably matches 0-1 path segments
+// for non-Next.js projects — a request for something 2+ segments deep
+// (e.g. /api/t08/auth/options) gets Vercel's own synthetic 404 before this
+// function is ever invoked. Reaching this file for every /api/t08/* depth
+// instead relies on the rewrite in vercel.json, which forwards the
+// request here while leaving req.url as the original requested path (a
+// Vercel rewrite does not rewrite req.url itself), so the parsing below
+// still sees e.g. "/api/t08/auth/options" unchanged.
+//
 // api/t08/bootstrap/** and api/t08/invite/** are intentionally NOT routed
 // through this file — they stay as their own (flag-gated / rarely used)
-// functions. Vercel matches a static file route (e.g.
-// api/t08/bootstrap/register/options.js) before falling back to this
-// [...path] catch-all, so both keep working unchanged side by side.
+// functions. Vercel matches an existing static file (e.g.
+// api/t08/bootstrap/register/options.js) before applying any rewrite, so
+// both keep working unchanged side by side with no explicit exclusion
+// needed in vercel.json.
 //
 // The path/method dispatch below parses req.url directly (not
-// req.query.path) so this file behaves identically under Vercel's Node
+// req.query) so this file behaves identically under Vercel's Node
 // runtime and under the plain http.Server used for local dev + tests,
 // exactly like the standalone handlers it replaces did.
 
