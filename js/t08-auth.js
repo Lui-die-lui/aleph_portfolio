@@ -28,11 +28,26 @@
 
   if (!lockedEl || !unlockedEl || !loginBtn) return;
 
+  var SUCCESS_STATUS_MS = 2600;
+
+  // Success messages ("수정했습니다." etc.) auto-clear after a few seconds,
+  // like a toast, so they don't sit on screen forever; error messages stay
+  // until the next action overwrites them or the modal is closed (see
+  // clearStatus / the modal close handlers below).
   function setStatus(el, message, tone) {
     if (!el) return;
+    if (el._t08ClearTimer) {
+      clearTimeout(el._t08ClearTimer);
+      el._t08ClearTimer = null;
+    }
     el.textContent = message || '';
-    el.classList.remove('t08-status-error', 't08-status-info');
+    el.classList.remove('t08-status-error', 't08-status-info', 't08-status-success');
     if (tone) el.classList.add('t08-status-' + tone);
+    if (tone === 'success') {
+      el._t08ClearTimer = setTimeout(function () {
+        setStatus(el, '', null);
+      }, SUCCESS_STATUS_MS);
+    }
   }
 
   function friendlyError(err, context) {
@@ -144,6 +159,10 @@
     var p = document.createElement('p');
     p.textContent = item.content;
 
+    var updated = document.createElement('p');
+    updated.className = 't08-item-updated';
+    updated.textContent = '수정: ' + formatDate(item.updated_at);
+
     var actions = document.createElement('div');
     actions.className = 't08-item-actions';
 
@@ -173,6 +192,7 @@
 
     li.appendChild(head);
     li.appendChild(p);
+    li.appendChild(updated);
     li.appendChild(actions);
     return li;
   }
@@ -318,7 +338,7 @@
         }
         creatingNew = false;
         editingItemId = null;
-        setStatus(itemsStatusEl, isCreate ? '새 기록을 추가했습니다.' : '수정했습니다.', 'info');
+        setStatus(itemsStatusEl, isCreate ? '새 기록을 추가했습니다.' : '수정했습니다.', 'success');
         return loadPrivateItems();
       })
       .catch(function (message) {
@@ -338,7 +358,7 @@
         if (!result.ok) {
           throw serverErrorMessage(result.status, result.body && result.body.error);
         }
-        setStatus(itemsStatusEl, '삭제했습니다.', 'info');
+        setStatus(itemsStatusEl, '삭제했습니다.', 'success');
         return loadPrivateItems();
       })
       .catch(function (message) {
@@ -393,7 +413,7 @@
   function logout() {
     fetchJson('/api/t08/auth/logout', { method: 'POST' }).then(function () {
       showLocked();
-      setStatus(statusEl, '로그아웃했습니다.', 'info');
+      setStatus(statusEl, '로그아웃했습니다.', 'success');
     });
   }
 
@@ -432,6 +452,8 @@
         delBtn.disabled = isLast;
         if (isLast) delBtn.title = '마지막 남은 패스키는 삭제할 수 없습니다.';
         delBtn.addEventListener('click', function () {
+          var ok = window.confirm('"' + pk.deviceName + '" 패스키를 삭제할까요? 이 작업은 되돌릴 수 없습니다.');
+          if (!ok) return;
           deletePasskey(pk.id);
         });
 
@@ -446,11 +468,11 @@
     setStatus(manageStatusEl, '삭제 중...', 'info');
     fetchJson('/api/t08/passkeys/' + encodeURIComponent(id), { method: 'DELETE' }).then(function (result) {
       if (result.ok) {
-        setStatus(manageStatusEl, '삭제했습니다.', 'info');
+        setStatus(manageStatusEl, '삭제했습니다.', 'success');
         return loadPasskeys();
       }
       if (result.status === 409) {
-        setStatus(manageStatusEl, '마지막 남은 패스키는 삭제할 수 없습니다. 삭제하면 계정에 다시 접근할 수 없습니다.', 'error');
+        setStatus(manageStatusEl, '마지막 패스키는 삭제할 수 없습니다. 새 패스키를 먼저 등록해 주세요.', 'error');
         return;
       }
       setStatus(manageStatusEl, '삭제하지 못했습니다.', 'error');
@@ -475,7 +497,7 @@
       })
       .then(function (verifyRes) {
         if (!verifyRes.ok) throw { handled: true, message: '패스키 등록에 실패했습니다.' };
-        setStatus(manageStatusEl, '패스키를 등록했습니다.', 'info');
+        setStatus(manageStatusEl, '패스키를 등록했습니다.', 'success');
         if (newDeviceNameInput) newDeviceNameInput.value = '';
         return loadPasskeys();
       })
@@ -500,6 +522,12 @@
   if (archiveModal) {
     archiveModal.addEventListener('click', function (event) {
       if (event.target === archiveModal) archiveModal.close();
+    });
+    // Covers every way the dialog can close (button, backdrop click, Esc) —
+    // a lingering error message shouldn't still be there next time it opens.
+    archiveModal.addEventListener('close', function () {
+      setStatus(statusEl, '', null);
+      setStatus(itemsStatusEl, '', null);
     });
   }
 
@@ -531,6 +559,9 @@
   if (manageModal) {
     manageModal.addEventListener('click', function (event) {
       if (event.target === manageModal) manageModal.close();
+    });
+    manageModal.addEventListener('close', function () {
+      setStatus(manageStatusEl, '', null);
     });
   }
   if (addPasskeyBtn) addPasskeyBtn.addEventListener('click', addPasskey);

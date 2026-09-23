@@ -597,8 +597,8 @@ main {
 .folder-icon-key {
   max-width: none;
   top: 61%;
-  width: 64%;
-  height: 64%;
+  width: 48%;
+  height: 48%;
 }
 
 .folder-label {
@@ -1451,6 +1451,10 @@ body.reduce-motion .folder-btn[data-template="about"] .folder-icon-frame {
   color: #ff9f8a;
 }
 
+.t08-status-success {
+  color: #8fd6a5;
+}
+
 .t08-unlocked-head {
   display: flex;
   flex-wrap: wrap;
@@ -1512,6 +1516,12 @@ body.reduce-motion .folder-btn[data-template="about"] .folder-icon-frame {
   line-height: 1.6;
   color: rgba(245, 244, 241, 0.85);
   white-space: pre-wrap;
+}
+
+.t08-item-updated {
+  margin: 6px 0 0;
+  font-size: 0.72rem;
+  color: rgba(245, 244, 241, 0.5);
 }
 
 /* Edit/delete stay out of the way until the card is hovered or focused

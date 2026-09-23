@@ -2,6 +2,7 @@
 
 const { test, before, after } = require('node:test');
 const assert = require('node:assert/strict');
+const crypto = require('node:crypto');
 const server = require('../../server');
 const {
   createUser,
@@ -51,6 +52,58 @@ test('GET /api/t08/auth/session without a cookie -> 401, authenticated:false', a
   const body = await res.json();
   assert.equal(res.status, 401);
   assert.equal(body.authenticated, false);
+});
+
+// --- Logging in with a credential id nobody registered ---
+
+// Syntactically valid but cryptographically fake WebAuthn authentication
+// response — same approach as registration-reject.test.js. Enough to reach
+// authVerify's "no matching credential" branch (api/t08/_lib/handlers/
+// authVerify.js), which never calls verifyAuthenticationResponse at all for
+// an unknown credential id, so no genuine signature is needed to prove this
+// rejection path.
+function fakeAuthenticationResponse(credentialId, challenge, origin) {
+  const clientDataJSON = Buffer.from(
+    JSON.stringify({ type: 'webauthn.get', challenge, origin })
+  ).toString('base64url');
+  return {
+    id: credentialId,
+    rawId: credentialId,
+    type: 'public-key',
+    response: {
+      clientDataJSON,
+      authenticatorData: Buffer.from('fake-authenticator-data').toString('base64url'),
+      signature: Buffer.from('fake-signature').toString('base64url'),
+    },
+    clientExtensionResults: {},
+  };
+}
+
+test('logging in with a credential id that was never registered is rejected (401), and the challenge cannot be retried', async () => {
+  const optionsRes = await req('/api/t08/auth/options', { method: 'POST' });
+  const options = await optionsRes.json();
+
+  const unknownId = crypto.randomBytes(16).toString('base64url');
+  const verifyRes = await req('/api/t08/auth/verify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      response: fakeAuthenticationResponse(unknownId, options.challenge, 'http://localhost:3000'),
+    }),
+  });
+  assert.equal(verifyRes.status, 401);
+
+  // Same challenge, a different unknown id — still rejected, because the
+  // challenge was already burned by the first (failed) attempt above.
+  const retryId = crypto.randomBytes(16).toString('base64url');
+  const retryRes = await req('/api/t08/auth/verify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      response: fakeAuthenticationResponse(retryId, options.challenge, 'http://localhost:3000'),
+    }),
+  });
+  assert.equal(retryRes.status, 401);
 });
 
 // --- 2/6/7. Ownership isolation between two accounts ---
@@ -262,6 +315,88 @@ test('updating and deleting another account\'s item is rejected (404); own item 
   const afterDelete = await req('/api/t08/private-items', { headers: { cookie: cookieA } });
   const afterDeleteBody = await afterDelete.json();
   assert.equal(afterDeleteBody.items.length, 0);
+});
+
+// --- 9/10/11/12/17. Cross-account isolation, checked in both directions ---
+
+test('cross-account private-item update/delete is rejected in both directions, and item counts are unchanged', async () => {
+  const userA = await createUser('items_iso_a', 'Items Iso A');
+  const userB = await createUser('items_iso_b', 'Items Iso B');
+  await seedPrivateItems(userA.id, [{ title: 'A only', content: 'a', category: 'note' }]);
+  await seedPrivateItems(userB.id, [{ title: 'B only', content: 'b', category: 'note' }]);
+  const cookieA = await seedSession(userA.id);
+  const cookieB = await seedSession(userB.id);
+
+  const itemA = (await (await req('/api/t08/private-items', { headers: { cookie: cookieA } })).json())
+    .items[0];
+  const itemB = (await (await req('/api/t08/private-items', { headers: { cookie: cookieB } })).json())
+    .items[0];
+
+  // A -> B
+  const aUpdatesB = await req(`/api/t08/private-items/${itemB.id}`, {
+    method: 'PATCH',
+    headers: { cookie: cookieA, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title: 'hijacked', content: 'x', category: 'y' }),
+  });
+  assert.equal(aUpdatesB.status, 404);
+  const aDeletesB = await req(`/api/t08/private-items/${itemB.id}`, {
+    method: 'DELETE',
+    headers: { cookie: cookieA },
+  });
+  assert.equal(aDeletesB.status, 404);
+
+  // B -> A (the reverse direction)
+  const bUpdatesA = await req(`/api/t08/private-items/${itemA.id}`, {
+    method: 'PATCH',
+    headers: { cookie: cookieB, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title: 'hijacked', content: 'x', category: 'y' }),
+  });
+  assert.equal(bUpdatesA.status, 404);
+  const bDeletesA = await req(`/api/t08/private-items/${itemA.id}`, {
+    method: 'DELETE',
+    headers: { cookie: cookieB },
+  });
+  assert.equal(bDeletesA.status, 404);
+
+  // Neither account's item count or content changed from the other's attempts.
+  const stillA = await (await req('/api/t08/private-items', { headers: { cookie: cookieA } })).json();
+  const stillB = await (await req('/api/t08/private-items', { headers: { cookie: cookieB } })).json();
+  assert.equal(stillA.items.length, 1);
+  assert.equal(stillA.items[0].title, 'A only');
+  assert.equal(stillB.items.length, 1);
+  assert.equal(stillB.items[0].title, 'B only');
+});
+
+test('cross-account passkey deletion is rejected in both directions, and passkey counts are unchanged', async () => {
+  const userA = await createUser('pk_iso_a', 'PK Iso A');
+  const userB = await createUser('pk_iso_b', 'PK Iso B');
+  // Two passkeys each, so a rejected cross-account delete can be told apart
+  // from the separate "last passkey" 409 guard tested elsewhere.
+  const aKey1 = await seedPasskey(userA.id, { credentialId: 'iso-a-1-' + Date.now(), deviceName: 'A key 1' });
+  await seedPasskey(userA.id, { credentialId: 'iso-a-2-' + Date.now(), deviceName: 'A key 2' });
+  const bKey1 = await seedPasskey(userB.id, { credentialId: 'iso-b-1-' + Date.now(), deviceName: 'B key 1' });
+  await seedPasskey(userB.id, { credentialId: 'iso-b-2-' + Date.now(), deviceName: 'B key 2' });
+  const cookieA = await seedSession(userA.id);
+  const cookieB = await seedSession(userB.id);
+
+  // A -> B
+  const aDeletesB = await req(`/api/t08/passkeys/${bKey1}`, {
+    method: 'DELETE',
+    headers: { cookie: cookieA },
+  });
+  assert.equal(aDeletesB.status, 404);
+
+  // B -> A (the reverse direction)
+  const bDeletesA = await req(`/api/t08/passkeys/${aKey1}`, {
+    method: 'DELETE',
+    headers: { cookie: cookieB },
+  });
+  assert.equal(bDeletesA.status, 404);
+
+  const aList = await (await req('/api/t08/passkeys', { headers: { cookie: cookieA } })).json();
+  const bList = await (await req('/api/t08/passkeys', { headers: { cookie: cookieB } })).json();
+  assert.equal(aList.passkeys.length, 2, "A's passkeys are unchanged by B's attempt");
+  assert.equal(bList.passkeys.length, 2, "B's passkeys are unchanged by A's attempt");
 });
 
 // --- Bootstrap is only reachable while the flag is on ---
